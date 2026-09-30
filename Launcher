@@ -44,7 +44,7 @@
       // Open tab immediately on click to prevent browser pop-up blockers
       const win = window.open('about:blank', '_blank');
       if (!win) {
-        alert('Pop-up blocked! Boi, enable pop-ups in your browser.');
+        alert('Pop-up blocked! Boi, enable pop ups NOW');
         return;
       }
 
@@ -54,7 +54,7 @@
       try {
         // Appended timestamp bypasses browser and GitHub caching for instant updates
         const response = await fetch(RAW_HUB_URL + '?v=' + Date.now());
-        if (!response.ok) throw new Error('Failed to fetch site code.');
+        if (!response.ok) throw new Error('Failed to fetch site code. Im sorry :(');
         const portalContent = await response.text();
 
         // Inject the fetched HTML code into the popup window
