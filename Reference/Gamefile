@@ -4071,6 +4071,12 @@ function generateAllSections() {
   try {
     document.getElementById("lolbutton").remove();
   } catch (e) {}
+  // Re-running (retry button, or two loads racing) must replace what is
+  // already on the page rather than append a second copy of every game.
+  ["sections-container", "sidebar"].forEach(function (id) {
+    const existing = document.getElementById(id);
+    if (existing) existing.innerHTML = "";
+  });
   const allChars = [
     "0",
     "1",
