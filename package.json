@@ -15,6 +15,9 @@
   },
   "author": "Walter Dog",
   "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "node": ">=22.22.2"
+  },
   "bugs": {
     "url": "https://github.com/iforkeverythingisee/Walter-Dog-Hub/issues"
   },
