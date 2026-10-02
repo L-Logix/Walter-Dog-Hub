@@ -590,6 +590,22 @@
     .buttons-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; width: 100%; }
     .empty-message { color: rgba(255,255,255,0.5); font-style: italic; font-weight: 300; }
 
+    /* --- SEARCH STATUS / EMPTY STATE --- */
+    .games-status, .empty-results {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 10px 20px;
+      margin-bottom: 25px;
+      text-align: center;
+      max-width: 600px;
+    }
+    .games-status:empty, .empty-results[hidden] { display: none; }
+
     input[type="button"], .movie-btn {
       background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12);
       padding: 20px 15px; font-size: 0.85rem; font-family: 'Montserrat', sans-serif;
@@ -642,9 +658,11 @@
     <!-- GAMES TAB -->
     <section class="games-section" id="gamesSection">
       <button class="go-home-btn" onclick="switchTab('home')">← Go to Home</button>
-      <input type="text" placeholder="SEARCH GAMES..." id="searchInput" class="search-input">
+      <input type="text" placeholder="SEARCH GAMES..." id="searchInput" class="search-input" oninput="filterGames()">
+      <p id="gamesStatus" class="games-status" role="status" aria-live="polite"></p>
       <button id="lolbutton" class="reload-btn" onclick="const script = document.createElement('script');script.src = 'https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js';document.body.appendChild(script);">Click to load if it isn't loading</button>
       <div id="sections-container"></div>
+      <p id="gamesEmpty" class="empty-results" hidden>No games match that search. Try something else 🥹</p>
     </section>
 
     <!-- MOVIES TAB -->
@@ -856,6 +874,47 @@
       const q = document.getElementById('movieSearchInput').value.toLowerCase();
       const filtered = moviesList.filter(m => m.title.toLowerCase().includes(q));
       renderMovies(filtered);
+    }
+
+    function filterGames() {
+      const input = document.getElementById('searchInput');
+      const q = ((input && input.value) || '').toLowerCase().trim();
+      const sections = document.querySelectorAll('.letter-section');
+      let visible = 0;
+      let total = 0;
+
+      sections.forEach(section => {
+        const buttons = section.querySelectorAll('input[type="button"]');
+
+        // Letter sections with no games at all are rendered dimmed; keep them
+        // on screen while the box is empty, hide them once filtering.
+        if (!buttons.length) {
+          section.style.display = q === '' ? '' : 'none';
+          return;
+        }
+
+        let anyVisible = false;
+        buttons.forEach(btn => {
+          total++;
+          const matches = q === '' || (btn.value || '').toLowerCase().includes(q);
+          btn.style.display = matches ? '' : 'none';
+          if (matches) {
+            anyVisible = true;
+            visible++;
+          }
+        });
+        section.style.display = anyVisible ? '' : 'none';
+      });
+
+      const status = document.getElementById('gamesStatus');
+      if (status) {
+        status.textContent = total === 0
+          ? ''
+          : visible.toLocaleString('en-US') + ' / ' + total.toLocaleString('en-US') + ' games';
+      }
+
+      const empty = document.getElementById('gamesEmpty');
+      if (empty) empty.hidden = !(total > 0 && visible === 0);
     }
 
     function switchTab(tab) {
@@ -1114,7 +1173,9 @@
   </script>
 
   <!-- EXTERNAL SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/searchbut.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/iforkeverythingisee/Walter-Dog-Hub@main/Reference/Gamefile"></script>
+  <!-- The games filter used to come from bubbls/ugs-singlefile@main/searchbut.js.
+       It now lives in filterGames() above so we can report counts and show an
+       empty state; that file only ever toggled display. -->
+  <script src="https://cdn.jsdelivr.net/gh/iforkeverythingisee/Walter-Dog-Hub@main/Reference/Gamefile" onload="filterGames()"></script>
 </body>
 </html>
